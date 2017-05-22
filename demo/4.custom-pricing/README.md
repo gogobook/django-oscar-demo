@@ -13,20 +13,20 @@ Now, let's simplify things for the shop admin:
 * 關於產品價格
   * we just want to input the cost price and have the retail price and tax calculated automatically
   * 我們只想要輸入成本價格，讓零售價格與稅金自動算出
-Let's start with the dashboard -
-從儀表板開始
+## Let's start with the dashboard -
+## 從儀表板開始
 
-* we want just to have a cost price and available stock fields available as part of product detail (not in stockrecord)
+* we want just to have a cost price and available stock fields available as part of product detail (not in stockrecord)  
 我們想要讓成本價與可得庫存欄位是產品細節的一部份。
 
-The dashboard uses html templates, so let's find the product edit template
+The dashboard uses html templates, so let's find the product edit template  
 儀表板使用html模板，所以找產品編輯模板出來
 * [oscar/dashboard/catalogue/product_update.html](https://github.com/django-oscar/django-oscar/blob/1.1.1/src/oscar/templates/oscar/dashboard/catalogue/product_update.html#L97)
   * ok, it's a standard django form, let's find the form
   * 好的，這是一個標準的django form，讓我們找到表單
 * [oscar/apps/dashboard/catalogue/forms.py](https://github.com/django-oscar/django-oscar/blob/1.1.1/src/oscar/apps/dashboard/catalogue/forms.py#L210)
 
-ok, so we should extend the form to add the price field and num in stock field
+ok, so we should extend the form to add the price field and num in stock field  
 好的，所以我們應該擴展表單以加入價格欄位及庫存數量(`num_in_stock`)欄位
 ```bash
 $ ./manage.py oscar_fork_app dashboard.catalogue oscardemo/
@@ -63,12 +63,17 @@ class StockRecordFormSet(OscarStockRecordFormSet):
           {% include "dashboard/partials/form_field.html" with field=stockrecord_form.DELETE nolabel=True %}
       </td>
 ```
-ok, now dashboard allows to input only cost price and number of units, but if we look at the product on the site, it doesn't have a price
-now comes an interesting part of oscar - the product availability and pricing is managing in strategy objects, this allows great flexibility
-for our demo, we need to modify the strategy object to calculate the prcies from the cost price
-the oscar partner app manages the strategy, so let's fork it:
 
-現在儀表板可以輸入成本價與單位數量，但假如我檢視在網站上的產品，它仍未有價格
+## 修改strategy.py
+ok, now dashboard allows to input only cost price and number of units, but if we look at the product on the site, it doesn't have a price.  
+Now comes an interesting part of oscar - the product availability and pricing is managing in strategy objects, this allows great flexibility.
+For our demo, we need to modify the strategy object to calculate the prices from the cost price.
+The oscar partner app manages the strategy, so let's fork it:
+
+現在儀表板可以輸入成本價與單位數量，但假如我檢視在網站上的產品，它仍未有價格  
+現在要進入Oscar 中相當有趣的一部分，產品可得性與定價格是在策略物件中管理的，這樣允許了非常大的彈性。  
+對這個demo 而言，我們需要修改策略物，以便可從成本價格計算出銷倍價格。  
+
 
 ```bash
 $ ./manage.py oscar_fork_app partner oscardemo/
@@ -81,6 +86,7 @@ now, let's see the modifications:
 * [oscardemo/partner/strategy.py](oscardemo/partner/strategy.py)
 ```python
 # the selector class allows to change the pricing/availability strategy
+# 這裡繼承 Oscar 的 Selector，並返回一個Default的一個混合的mixin
 class Selector(OscarSelector):
 
     def strategy(self, request=None, user=None, **kwargs):
@@ -88,7 +94,7 @@ class Selector(OscarSelector):
         # but for now we will use the same strategy for all cases
 return OscarDemoStrategy(request)
 
-# the strategy object usese multiple classes, each providing some of the functionality
+# the strategy object use multiple classes, each providing some of the functionality
 class OscarDemoStrategy(
     UseFirstStockRecord,  # oscar allows multiple stockrecords for the same product
                           # this allows, for example, to have orders of a large quantity be made via a different supplier
@@ -102,14 +108,13 @@ class OscarDemoStrategy(
                  # fetch_for_product and fetch_for_parent (product)
                  # it then returns a PurchaseInfo object containing the price and availability
 ):
-
+以及二個方法 `def pricing_policy(self, product, stockrecord):`及 `def parent_pricing_policy(self, product, children_stock):`，皆來自`Structured`
 ```
 
 * [oscardemo/partner/prices.py](oscardemo/partner/prices.py)
 ```python
 from oscar.apps.partner.prices import FixedPrice
 from decimal import Decimal as D
-
 
 class CostBasedPrice(FixedPrice):
 
