@@ -4,7 +4,7 @@ from oscar.apps.partner.strategy import (
     StockRequired,
     Structured
 )
-from prices import CostBasedPrice
+from .prices import CostBasedPrice
 from oscar.apps.partner.prices import Unavailable as PriceUnavailable
 
 

@@ -20,11 +20,11 @@ Now, let's simplify things for the shop admin:
 我們想要讓成本價與可得庫存欄位是產品細節的一部份。
 
 The dashboard uses html templates, so let's find the product edit template  
-儀表板使用html模板，所以找產品編輯模板出來
-* [oscar/dashboard/catalogue/product_update.html](https://github.com/django-oscar/django-oscar/blob/1.1.1/src/oscar/templates/oscar/dashboard/catalogue/product_update.html#L97)
+儀表板使用html模板，所以找出產品編輯模板
+* [oscar/dashboard/catalogue/product_update.html](https://github.com/django-oscar/django-oscar/blob/master/src/oscar/templates/oscar/dashboard/catalogue/product_update.html#L97)
   * ok, it's a standard django form, let's find the form
   * 好的，這是一個標準的django form，讓我們找到表單
-* [oscar/apps/dashboard/catalogue/forms.py](https://github.com/django-oscar/django-oscar/blob/1.1.1/src/oscar/apps/dashboard/catalogue/forms.py#L210)
+* [oscar/apps/dashboard/catalogue/forms.py](https://github.com/django-oscar/django-oscar/blob/master/src/oscar/apps/dashboard/catalogue/forms.py#L157)
 
 ok, so we should extend the form to add the price field and num in stock field  
 好的，所以我們應該擴展表單以加入價格欄位及庫存數量(`num_in_stock`)欄位
@@ -72,7 +72,7 @@ The oscar partner app manages the strategy, so let's fork it:
 
 現在儀表板可以輸入成本價與單位數量，但假如我檢視在網站上的產品，它仍未有價格  
 現在要進入Oscar 中相當有趣的一部分，產品可得性與定價格是在策略物件中管理的，這樣允許了非常大的彈性。  
-對這個demo 而言，我們需要修改策略物，以便可從成本價格計算出銷倍價格。  
+對這個demo 而言，我們需要修改策略物，以便可從成本價格計算出銷售價格。  
 
 
 ```bash
@@ -121,7 +121,7 @@ class CostBasedPrice(FixedPrice):
     def __init__(self, currency, cost_price):
         excl_tax = cost_price * D(2)
         tax = excl_tax * D(.18)
-super(CostBasedPrice, self).__init__(currency, excl_tax, tax)
+        super(CostBasedPrice, self).__init__(currency, excl_tax, tax)
 ```
 That's it, simple huh? Now, have a look at the site..
 

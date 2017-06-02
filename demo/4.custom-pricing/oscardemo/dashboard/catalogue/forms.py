@@ -1,8 +1,6 @@
 from django import forms
-from oscar.apps.dashboard.catalogue.forms import (
-    ProductForm as OscarProductForm,
-    StockRecordFormSet as OscarStockRecordFormSet
-)
+from oscar.apps.dashboard.catalogue.forms import ProductForm as OscarProductForm
+from oscar.apps.dashboard.catalogue.formsets import StockRecordFormSet as OscarStockRecordFormSet
 
 
 # here we override the core oscar product form
