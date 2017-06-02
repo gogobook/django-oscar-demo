@@ -123,6 +123,29 @@ class CostBasedPrice(FixedPrice):
         tax = excl_tax * D(.18)
         super(CostBasedPrice, self).__init__(currency, excl_tax, tax)
 ```
+
+## 修改views.py
+
+```python
+class ProductCreateUpdateView(generic.UpdateView):
+...
+    # stockrecord_formset = StockRecordFormSet
+
+    def __init__(self, *args, **kwargs):
+        super(ProductCreateUpdateView, self).__init__(*args, **kwargs)
+        self.formsets = {'category_formset': self.category_formset,
+                         'image_formset': self.image_formset,
+                         'recommended_formset': self.recommendations_formset,
+                        #  'stockrecord_formset': self.stockrecord_formset
+                         }
+
+```
+
+直接在`./dashboard/catalogue/views.py`註解掉`stockrecord_formset`
 That's it, simple huh? Now, have a look at the site..
+
+## 無法購買-->不可得
+`strategy.py`中 `class OscarDemoStrategy(UseFirstStockRecord, StockRequired, Structured,):`這雖然使用了三個父類，但並沒有明確處理availability，以致於目前是屬於不可得的情形。並且`def availability_policy(self, product, stockrecord):` 是在`StockRequired`之中，這會檢查`stockrecord`與`stockrecord.price_excl_tax`並且最後會檢查`StockRequiredAvailability(stockrecord.net_stock_level)` `StockRequiredAvailability = get_class('partner.availability', 'StockRequired')`
+
 
 <p dir=ltr><-- <a href="/demo/3.variants-and-dates/README.md">variants, extending core classes, modifying css using less</a></p>
